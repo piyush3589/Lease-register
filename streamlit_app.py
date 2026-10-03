@@ -290,8 +290,9 @@ with tab_extract:
             choice_path = display_to_path.get(choice_disp) or choice_disp
             # Try basename too
             if not os.path.exists(choice_path):
+                b = os.path.basename(choice_path)
                 for s in samples:
-                    if os.path.basename(s) == choice_disp or os.path.basename(s) == os.path.basename(choice_path):
+                    if os.path.basename(s) == choice_disp or os.path.basename(s) == b:
                         choice_path = s; break
             try:
                 with open(choice_path, encoding="utf-8") as f:
