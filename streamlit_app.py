@@ -240,27 +240,36 @@ with tab_extract:
             st.warning("No sample_leases folder found.")
         # Show relative names if possible
         sample_display = []
+        # Create display options
+        rel_paths = []
         for s in samples:
             try:
-                sample_display.append(os.path.relpath(s))
+                # Try to get relative to file or cwd
+                base = os.path.dirname(os.path.abspath(__file__))
+                rp = os.path.relpath(s, base)
+                if rp.startswith(".."):
+                    rp = os.path.relpath(s)
+                rel_paths.append(rp)
             except Exception:
-                sample_display.append(s)
-        # Map display -> full path
-        display_to_path = {os.path.relpath(s) if True else s: s for s in samples}
-        choice_disp = st.selectbox("Pick a sample", ["(none)"] + [os.path.relpath(s) for s in samples])
+                rel_paths.append(s)
+        # Dedup display
+        # Build mapping
+        display_to_path = {}
+        for s, rp in zip(samples, rel_paths):
+            display_to_path[rp] = s
+            display_to_path[os.path.basename(s)] = s  # also allow basename
+        choice_disp = st.selectbox("Pick a sample", ["(none)"] + sorted(display_to_path.keys()))
         if choice_disp != "(none)":
-            choice = os.path.join(os.path.dirname(os.path.abspath(__file__)), choice_disp) if not os.path.exists(choice_disp) else choice_disp
-            # Better: find actual path
-            choice_path = None
-            for s in samples:
-                if os.path.relpath(s) == choice_disp:
-                    choice_path = s; break
-            if choice_path is None:
-                choice_path = choice_disp
+            choice_path = display_to_path.get(choice_disp) or choice_disp
+            # Try basename too
+            if not os.path.exists(choice_path):
+                for s in samples:
+                    if os.path.basename(s) == choice_disp or os.path.basename(s) == os.path.basename(choice_path):
+                        choice_path = s; break
             try:
                 with open(choice_path, encoding="utf-8") as f:
                     text_to_extract = f.read()
-                source_name = choice_disp
+                source_name = os.path.basename(choice_path)
             except Exception as e:
                 st.error(f"Could not read sample: {e}")
 
