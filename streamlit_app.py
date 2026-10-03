@@ -225,15 +225,42 @@ with tab_extract:
     source_name = "pasted.txt"
 
     if mode == "Sample leases":
-        samples = sorted(glob.glob("sample_leases/*.txt"))
+        # Handle both local and Streamlit Cloud paths
+        import os
+        samples = []
+        # Try relative path
+        samples.extend(glob.glob("sample_leases/*.txt"))
+        # Try absolute paths for common Streamlit Cloud locations
+        base_dirs = [os.getcwd(), os.path.dirname(os.path.abspath(__file__))]
+        for base in base_dirs:
+            samples.extend(glob.glob(os.path.join(base, "sample_leases", "*.txt")))
+        # Deduplicate
+        samples = sorted(set(samples))
         if not samples:
-            st.warning("No sample_leases folder found in current directory.")
-        choice = st.selectbox("Pick a sample", ["(none)"] + samples)
-        if choice != "(none)":
+            st.warning("No sample_leases folder found.")
+        # Show relative names if possible
+        sample_display = []
+        for s in samples:
             try:
-                with open(choice, encoding="utf-8") as f:
+                sample_display.append(os.path.relpath(s))
+            except Exception:
+                sample_display.append(s)
+        # Map display -> full path
+        display_to_path = {os.path.relpath(s) if True else s: s for s in samples}
+        choice_disp = st.selectbox("Pick a sample", ["(none)"] + [os.path.relpath(s) for s in samples])
+        if choice_disp != "(none)":
+            choice = os.path.join(os.path.dirname(os.path.abspath(__file__)), choice_disp) if not os.path.exists(choice_disp) else choice_disp
+            # Better: find actual path
+            choice_path = None
+            for s in samples:
+                if os.path.relpath(s) == choice_disp:
+                    choice_path = s; break
+            if choice_path is None:
+                choice_path = choice_disp
+            try:
+                with open(choice_path, encoding="utf-8") as f:
                     text_to_extract = f.read()
-                source_name = choice
+                source_name = choice_disp
             except Exception as e:
                 st.error(f"Could not read sample: {e}")
 
