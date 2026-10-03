@@ -93,10 +93,17 @@ def extract_text(text: str, save: bool, source_name: str) -> Optional[dict]:
         
         if save:
             try:
-                saved = registry.save_extraction(text, source_name, res)
+                # registry.save_extraction is keyword-only in this codebase
+                saved = registry.save_extraction(
+                    text=text,
+                    source_name=source_name,
+                    source_kind="pdf" if source_name.lower().endswith(".pdf") else "txt",
+                    extraction=res,
+                )
+                # saved is a dict based on signature
                 data["saved"] = True
-                data["lease_id"] = saved.id
-                data["created"] = saved.created
+                data["lease_id"] = saved.get("id")
+                data["created"] = saved.get("created")
             except Exception as e:
                 st.warning(f"Extraction succeeded but saving to register failed: {e}")
                 data["saved"] = False
