@@ -236,9 +236,25 @@ with tab_extract:
         samples.extend(glob.glob(os.path.join(here, "sample_leases", "*.txt")))
         # Also common Streamlit Cloud roots
         for root in [here, os.getcwd()]:
-            for name in ["sample_leases", "Lease-register/sample_leases", "lease-register/sample_leases"]:
+            for name in [
+                "sample_leases",
+                "Lease-register/sample_leases",
+                "lease-register/sample_leases",
+                "../Lease-register/sample_leases",
+                "../../Lease-register/sample_leases",
+                "../lease-register/sample_leases",
+            ]:
                 p = os.path.join(root, name, "*.txt")
                 samples.extend(glob.glob(p))
+        # Also scan common mount paths on Streamlit Cloud
+        for cand in [
+            "/mount/src/lease-register/sample_leases/*.txt",
+            "/mount/src/Lease-register/sample_leases/*.txt",
+        ]:
+            try:
+                samples.extend(glob.glob(cand))
+            except Exception:
+                pass
         # Deduplicate (normalize)
         seen = set()
         uniq = []
