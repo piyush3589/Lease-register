@@ -227,17 +227,26 @@ with tab_extract:
     source_name = "pasted.txt"
 
     if mode == "Sample leases":
-        # Handle both local and Streamlit Cloud paths
-        import os
         samples = []
-        # Try relative path
+        # Try relative to current working dir
         samples.extend(glob.glob("sample_leases/*.txt"))
-        # Try absolute paths for common Streamlit Cloud locations
-        base_dirs = [os.getcwd(), os.path.dirname(os.path.abspath(__file__))]
-        for base in base_dirs:
-            samples.extend(glob.glob(os.path.join(base, "sample_leases", "*.txt")))
-        # Deduplicate
-        samples = sorted(set(samples))
+        samples.extend(glob.glob("sample_leases\\*.txt"))
+        # Try relative to this file
+        here = os.path.dirname(os.path.abspath(__file__))
+        samples.extend(glob.glob(os.path.join(here, "sample_leases", "*.txt")))
+        # Also common Streamlit Cloud roots
+        for root in [here, os.getcwd()]:
+            for name in ["sample_leases", "Lease-register/sample_leases", "lease-register/sample_leases"]:
+                p = os.path.join(root, name, "*.txt")
+                samples.extend(glob.glob(p))
+        # Deduplicate (normalize)
+        seen = set()
+        uniq = []
+        for s in samples:
+            norm = os.path.normpath(s)
+            if norm not in seen:
+                seen.add(norm); uniq.append(norm)
+        samples = uniq
         if not samples:
             st.warning("No sample_leases folder found.")
         # Show relative names if possible
