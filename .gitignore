@@ -1,0 +1,34 @@
+.env
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.streamlit/
+
+# The register holds real lease data (names, addresses, rents). Never commit it.
+*.db
+*.db-shm
+*.db-wal
+
+# Env & secrets
+.env
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local DB
+lease_register.db
+
+# OS junk
+.DS_Store
+Thumbs.db

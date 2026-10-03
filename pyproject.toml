@@ -1,0 +1,28 @@
+# Ruff config. v1 had `# noqa: BLE001` comments but no linter wired up, so
+# nothing was actually enforcing them.
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "BLE", "SIM", "RET", "ARG"]
+# Tests build fakes with unused-looking args and shadow builtins on purpose.
+per-file-ignores = ["test_*.py"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["amounts", "api", "app", "documents", "extractor", "llm_utils", "registry"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "test_amounts.py",
+    "test_api.py",
+    "test_documents.py",
+    "test_extractor.py",
+    "test_fallback.py",
+    "test_integration.py",
+    "test_llm_utils.py",
+    "test_register_api.py",
+    "test_registry.py",
+    "test_structured_output.py",
+]
+filterwarnings = ["error::DeprecationWarning:app.*"]

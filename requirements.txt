@@ -1,0 +1,14 @@
+# langchain-groq >= 0.3.8 is required for with_structured_output(method="json_schema"),
+# which is what enables Groq strict Structured Outputs.
+langchain-groq>=0.3.8
+langchain-core>=0.3.0,<2.0.0
+pydantic>=2.0.0
+streamlit>=1.38.0
+python-dotenv>=1.0.1
+pytest>=8.0.0
+fastapi>=0.115.0
+uvicorn>=0.30.0
+python-multipart>=0.0.9
+httpx>=0.27.0
+requests>=2.32.0
+pypdf>=5.0.0
