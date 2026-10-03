@@ -32,3 +32,7 @@ lease_register.db
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Misc local notes
+HOW_TO_RUN.txt
+job_description.txt
