@@ -83,13 +83,19 @@ def extract_text(text: str, save: bool, source_name: str) -> Optional[dict]:
 
     try:
         res = extractor.extract_lease_details(llm, text)
-        # Pydantic v2 model
+        # Pydantic v2 model - res has details, evidence etc
         if hasattr(res, "model_dump"):
             data = res.model_dump()
         elif hasattr(res, "dict"):
             data = res.dict()
         else:
             data = res.__dict__
+        # Normalize to flat fields for UI
+        if "details" in data and isinstance(data["details"], dict):
+            data["fields"] = data.pop("details")
+        elif "details" not in data:
+            # try to build from res
+            pass
         
         if save:
             try:
