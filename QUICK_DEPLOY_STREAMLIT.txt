@@ -1,0 +1,17 @@
+QUICK DEPLOY TO STREAMLIT CLOUD
+
+1. Go to https://share.streamlit.io/
+2. Sign in with GitHub
+3. Click "New app" > "Deploy a public app from GitHub"
+4. Select repo: piyush3589/Lease-register
+5. Branch: main
+6. Main file path: streamlit_app.py
+7. Click "Advanced settings" > "Secrets"
+8. Add:
+   GROQ_API_KEY = "your_groq_api_key_here"
+   GROQ_MODEL = "openai/gpt-oss-120b"
+9. Click "Deploy"
+
+Done! Your app will be live in ~1-2 minutes.
+
+Need Groq key? Get it free at https://console.groq.com/keys
