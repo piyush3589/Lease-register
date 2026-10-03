@@ -426,9 +426,10 @@ with tab_register:
             if full:
                 # Show fields
                 st.subheader("Fields & evidence")
-                fields_map = {f.field_name: f for f in full.fields}
-                evidence_map = {f.field_name: f.source_quote for f in full.fields}
-                unverified_set = {f.field_name for f in full.fields if not f.verified}
+                # full is dict from registry.get_lease
+                fields_vals = full.get("fields", {}) or {}
+                evidence_vals = full.get("evidence", {}) or {}
+                unverified_set = set(full.get("unverified_fields", []) or [])
 
                 grid = st.columns(2)
                 order = [
@@ -444,17 +445,17 @@ with tab_register:
                 ]
                 for i, fname in enumerate(order):
                     with grid[i % 2]:
-                        ff = fields_map.get(fname)
                         with st.container(border=True):
                             st.markdown(f"**{label(fname)}**")
-                            val = ff.value if ff else None
+                            val = fields_vals.get(fname)
                             st.write(val if val is not None else "_Not found in document_")
-                            if ff and ff.source_quote:
-                                st.caption(f"Source quote: “{ff.source_quote}”")
-                                if ff.verified:
-                                    st.caption("✓ Verified against document text.")
-                                else:
+                            q = evidence_vals.get(fname)
+                            if q:
+                                st.caption(f"Source quote: “{q}”")
+                                if fname in unverified_set:
                                     st.caption("⚠️ Not verified against document text.")
+                                else:
+                                    st.caption("✓ Verified against document text.")
 
                 # Actions
                 col_a, col_b, col_c = st.columns(3)
