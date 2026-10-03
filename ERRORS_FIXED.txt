@@ -1,0 +1,28 @@
+Errors Fixed While Deploying to Streamlit Cloud
+
+1. NameError: name 'glob' is not defined
+   - Cause: glob was used in sample_leases path discovery but not imported
+   - Fix: Added `import glob, os` to streamlit_app.py
+   - Commit: 2278bde
+
+2. Sample leases not found on Streamlit Cloud
+   - Cause: Paths like "sample_leases/*.txt" failed when cwd differed (/mount/src/lease-register)
+   - Fix: Multi-path lookup (cwd, file dir, common Streamlit Cloud roots like /mount/src/lease-register)
+   - Commits: 2ef94be, ccb4f9d, 2e749c0
+
+3. AttributeError: 'LeaseExtraction' object has no attribute 'to_dict'
+   - Cause: Using .to_dict() on Pydantic v2 model (should use model_dump()/dict())
+   - Fix: Serialize with model_dump() if available, fallback to dict()/__dict__; normalize details->fields for UI
+   - Commits: baab261, b822e16
+
+4. save_extraction() takes 0 positional args but 3 were given
+   - Cause: streamlit_app.py called with positional args; registry.save_extraction is keyword-only
+   - Fix: Call with keyword args (text, source_name, source_kind, extraction). Use source_kind='text' or 'pdf' (registry expects 'text' not 'txt')
+   - Commit: 9b614fc
+
+5. Wrong return keys / types from registry
+   - Cause: save_extraction returns dict with keys lease_id/created; also registry functions return dicts (not ORM objects)
+   - Fix: Read dict keys correctly (lease_id vs id). Handle list_leases/get_lease returning dicts throughout UI
+   - Commits: f1e5afc, 12a89dd, 3f1cc19
+
+Summary: All fixes applied to streamlit_app.py to make it compatible with the registry.py API and Streamlit Cloud filesystem. All existing tests still pass (224 passed).
