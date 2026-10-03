@@ -83,7 +83,13 @@ def extract_text(text: str, save: bool, source_name: str) -> Optional[dict]:
 
     try:
         res = extractor.extract_lease_details(llm, text)
-        data = res.to_dict()
+        # Pydantic v2 model
+        if hasattr(res, "model_dump"):
+            data = res.model_dump()
+        elif hasattr(res, "dict"):
+            data = res.dict()
+        else:
+            data = res.__dict__
         
         if save:
             try:
