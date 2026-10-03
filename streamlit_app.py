@@ -375,15 +375,16 @@ with tab_register:
         filtered = []
         ql = q.lower()
         for l in leases:
+            # l is dict from registry
             hay = " ".join(
                 str(x or "")
                 for x in [
-                    l.source_name,
-                    l.tenant_name,
-                    l.landlord_name,
-                    l.property_address,
-                    l.status,
-                    l.error or "",
+                    l.get("source_name"),
+                    l.get("tenant_name"),
+                    l.get("landlord_name"),
+                    l.get("property_address"),
+                    l.get("status"),
+                    l.get("error") or "",
                 ]
             ).lower()
             if not ql or ql in hay:
@@ -392,26 +393,26 @@ with tab_register:
         st.write(f"Showing {len(filtered)} of {len(leases)} leases")
 
         # Select lease
-        options = {f"#{l.id} {l.source_name} — {l.tenant_name or 'Unknown'}": l for l in filtered}
+        options = {f"#{l['id']} {l.get('source_name','')} - {l.get('tenant_name') or 'Unknown'}": l for l in filtered}
         sel = st.selectbox("Select a lease to inspect", list(options.keys()))
         chosen = options[sel] if sel else None
 
         if chosen:
             with st.container(border=True):
                 c1, c2, c3, c4 = st.columns(4)
-                c1.metric("Status", chosen.status)
-                c2.metric("Fields found", chosen.fields_found or 0)
-                c3.metric("Unverified", chosen.unverified_count or 0)
-                c4.metric("Degraded", "yes" if chosen.degraded else "no")
+                c1.metric("Status", chosen.get("status"))
+                c2.metric("Fields found", chosen.get("fields_found") or 0)
+                c3.metric("Unverified", chosen.get("unverified_count") or 0)
+                c4.metric("Degraded", "yes" if chosen.get("degraded") else "no")
 
-                st.write(f"**Source:** {chosen.source_name}")
-                st.write(f"**Created:** {chosen.created_at} | **Updated:** {chosen.updated_at}")
-                if chosen.error:
-                    st.error(chosen.error)
+                st.write(f"**Source:** {chosen.get('source_name')}")
+                st.write(f"**Created:** {chosen.get('created_at')} | **Updated:** {chosen.get('updated_at')}")
+                if chosen.get("error"):
+                    st.error(chosen.get("error"))
 
             # Load full lease with fields
             try:
-                full = registry.get_lease(chosen.id)
+                full = registry.get_lease(chosen["id"])
             except Exception as e:
                 st.error(f"Failed to load lease details: {e}")
                 full = None
@@ -454,7 +455,7 @@ with tab_register:
                 with col_a:
                     if st.button("Delete this lease", type="secondary"):
                         try:
-                            registry.delete_lease(chosen.id)
+                            registry.delete_lease(chosen["id"])
                             st.success("Deleted.")
                             st.rerun()
                         except Exception as e:
