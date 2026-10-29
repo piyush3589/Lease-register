@@ -131,15 +131,10 @@ def extract_text(text: str, save: bool, source_name: str) -> Optional[dict]:
 def extract_pdf(filename: str, raw: bytes, save: bool) -> Optional[dict]:
     """Extract from PDF bytes."""
     try:
-        # Parse PDF
-        text, errors = documents.text_from_pdf_bytes(raw, max_pages=MAX_PAGES, max_chars=MAX_TEXT_CHARS)
-        if errors:
-            for err in errors:
-                st.error(err)
-            return None
-        if not text:
-            st.error("PDF contains no extractable text (scanned/image-only PDF?).")
-            return None
+        # documents.text_from_pdf_bytes(data) returns the text and RAISES on any problem
+        # (empty file, password-protected, too many pages/chars, no text layer).
+        # DocumentTooLarge is a ValueError subclass, so one handler covers both.
+        text = documents.text_from_pdf_bytes(raw)
     except ValueError as e:
         st.error(str(e))
         return None
